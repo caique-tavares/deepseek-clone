@@ -5,59 +5,67 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
-  const wh = new Webhook(process.env.SIGNING_SECRET);
-  const headerPayload = await headers();
+  const headerPayload = headers();
+
   const svixHeaders = {
     "svix-id": headerPayload.get("svix-id"),
     "svix-timestamp": headerPayload.get("svix-timestamp"),
     "svix-signature": headerPayload.get("svix-signature"),
   };
 
-  //a
-
   const payload = await req.json();
   const body = JSON.stringify(payload);
-  const { data, type } = wh.verify(body, svixHeaders);
 
-  //sava to database
+  let data, type;
 
-  const userData = {
-    _id: data.id,
-    email: data.email_addresses[0].email_addresses,
-    name: `${data.first_name} ${data.last_name}`,
-    image: data.image_url,
-  };
-
-  await connectDB();
-
-  switch (type) {
-    case "user.created":
-      await User.create(userData);
-      break;
-    case "user.updated":
-      await User.findByIdAndUpdate(data.id, userData);
-      break;
-    case "user.deleted":
-      await User.findByIdAndDelete(data.id);
-      break;
-
-    default:
-      break;
+  try {
+    const wh = new Webhook(process.env.SIGNING_SECRET);
+    ({ data, type } = wh.verify(body, svixHeaders));
+    console.log("✅ Webhook verificado com sucesso:", type);
+  } catch (err) {
+    console.error("❌ Erro ao verificar o webhook:", err);
+    return NextResponse.json(
+      { error: "Webhook verification failed" },
+      { status: 400 }
+    );
   }
 
-  return NextResponse.json({ message: "Event received" });
-}
-
-export async function GET() {
   try {
     await connectDB();
-    return NextResponse.json({
-      status: "ok",
-      message: "Conexão com MongoDB bem-sucedida!",
-    });
-  } catch (error) {
+    console.log("✅ Conexão com MongoDB estabelecida.");
+
+    const userData = {
+      _id: data.id,
+      email: data.email_addresses?.[0]?.email_address || "",
+      name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+      image: data.image_url,
+    };
+
+    switch (type) {
+      case "user.created":
+        await User.create(userData);
+        console.log("👤 Usuário criado:", userData);
+        break;
+      case "user.updated":
+        await User.findByIdAndUpdate(data.id, userData);
+        console.log("🔄 Usuário atualizado:", userData);
+        break;
+      case "user.deleted":
+        await User.findByIdAndDelete(data.id);
+        console.log("🗑️ Usuário deletado:", data.id);
+        break;
+      default:
+        console.warn("⚠️ Evento não tratado:", type);
+    }
+
     return NextResponse.json(
-      { status: "error", message: "Erro ao conectar com MongoDB." },
+      { message: "Evento processado com sucesso." },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("❌ Erro ao processar o webhook:", err);
+    return NextResponse.json(
+      { error: "Erro ao processar webhook" },
       { status: 500 }
     );
   }
