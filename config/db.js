@@ -10,10 +10,12 @@ export default async function connectDB() {
       .then((mongoose) => mongoose);
   }
   try {
+    console.log("banco conectado com sucesso: ");
     cached.conn = await cached.promise;
   } catch (error) {
     console.error("Error connecting to MongoDB: ", error);
   }
 
+  console.log(cached.conn);
   return cached.conn;
 }

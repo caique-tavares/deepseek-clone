@@ -38,7 +38,7 @@ export async function POST(req) {
       await User.findByIdAndUpdate(data.id, userData);
       break;
     case "user.deleted":
-      await User.findByIdAndDelete(data.id, userData);
+      await User.findByIdAndDelete(data.id);
       break;
 
     default:
@@ -46,4 +46,19 @@ export async function POST(req) {
   }
 
   return NextResponse.json({ message: "Event received" });
+}
+
+export async function GET() {
+  try {
+    await connectDB();
+    return NextResponse.json({
+      status: "ok",
+      message: "Conexão com MongoDB bem-sucedida!",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { status: "error", message: "Erro ao conectar com MongoDB." },
+      { status: 500 }
+    );
+  }
 }
