@@ -3,13 +3,31 @@
 import Message from "@/components/Message";
 import PromptBox from "@/components/PromptBox";
 import Sidebar from "@/components/Sidebar";
+import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [expand, setExpand] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { selectedChat } = useAppContext();
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedChat) {
+      setMessages(selectedChat.messages);
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   return (
     <div>
@@ -48,7 +66,11 @@ export default function Home() {
               <p className="text-sm mt-2">How can i help you today?</p>
             </>
           ) : (
-            <div>
+            <div ref={containerRef}>
+              {
+                // messages.map(()=> (
+                // ))
+              }
               <Message role="user" content="What is next js?" />
             </div>
           )}
