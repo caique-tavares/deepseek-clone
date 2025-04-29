@@ -6,7 +6,7 @@ import ChatLabel from "./ChatLabel";
 
 const Sidebar = ({ expand, setExpand }) => {
   const { openSignIn } = useClerk();
-  const { user } = useAppContext();
+  const { user, chats, createNewChat } = useAppContext();
 
   const [openMenu, setOpenMenu] = useState({ id: 0, open: false });
 
@@ -23,7 +23,7 @@ const Sidebar = ({ expand, setExpand }) => {
         >
           <Image
             className={expand ? "w-36" : "w-10"}
-            src={expand ? "/images/logo_text.svg" : "/images/logo_icon.svg"}
+            src={expand ? "/images/logo_text.svg" : "/images/logo_icon.png"}
             alt="Logo"
             width={50}
             height={50}
@@ -67,6 +67,7 @@ const Sidebar = ({ expand, setExpand }) => {
           </div>
         </div>
         <button
+          onClick={createNewChat}
           className={`mt-8 flex items-center justify-center cursor-pointer ${
             expand
               ? "bg-primary hover:opacity-90 rounded-2xl gap-2 p-2.5 w-max"
@@ -94,7 +95,15 @@ const Sidebar = ({ expand, setExpand }) => {
           }`}
         >
           <p className="my-1">Recents</p>
-          <ChatLabel openMenu={openMenu} setOpenMenu={setOpenMenu} />
+          {chats.map((chat, index) => (
+            <ChatLabel
+              key={index}
+              id={chat._id}
+              name={chat.name}
+              openMenu={openMenu}
+              setOpenMenu={setOpenMenu}
+            />
+          ))}
         </div>
       </div>
       <div>

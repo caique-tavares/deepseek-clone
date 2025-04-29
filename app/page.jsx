@@ -55,23 +55,47 @@ export default function Home() {
             <>
               <div className="flex flex-col items-center ">
                 <Image
-                  src="/images/logo_icon.svg"
+                  src="/images/logo_icon.png"
                   alt=""
                   width={64}
                   height={64}
-                  className="h-16"
+                  className="h-16 rounded-full"
                 />
-                <p className="text-2xl font-medium">Hi, I'm DeepSeek.</p>
+                <p className="text-2xl font-medium">Hi, I'm Gemini.</p>
               </div>
               <p className="text-sm mt-2">How can i help you today?</p>
             </>
           ) : (
-            <div ref={containerRef}>
-              {
-                // messages.map(()=> (
-                // ))
-              }
-              <Message role="user" content="What is next js?" />
+            <div
+              ref={containerRef}
+              className="relative flex flex-col items-center justify-start w-full mt-20 max-h-screen overflow-y-auto"
+            >
+              <p className="fixed top-8 border border-transparent hover:border-gray-500/50 py-1 px-2 rounded-lg font-semibold mb-6">
+                {selectedChat.name}
+              </p>
+              {messages.map((message, index) => (
+                <Message
+                  key={index}
+                  role={message.role}
+                  content={message.content}
+                />
+              ))}
+              {isLoading && (
+                <div className="flex gap-4 max-w-3xl w-full py-3">
+                  <Image
+                    src="/images/logo_icon.png"
+                    alt="logo"
+                    width={36}
+                    height={36}
+                    className="p-1 border border-white/15 rounded-full"
+                  />
+                  <div className="loader flex justify-center items-center gap-1">
+                    <div className="w-1 h-1 rounded-full bg-white animate-bounce"></div>
+                    <div className="w-1 h-1 rounded-full bg-white animate-bounce"></div>
+                    <div className="w-1 h-1 rounded-full bg-white animate-bounce"></div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           <PromptBox isLoading={isLoading} setIsLoading={setIsLoading} />
